@@ -1,27 +1,21 @@
-// Для асинхронной работы используется пакет micro.
-const { json } = require('micro');
+const {
+  json
+} = require('micro');
+const answer = require('./api/answer');
 
-// Запуск асинхронного сервиса.
 module.exports = async req => {
+  const {
+    request,
+    session,
+    version
+  } = await json(req);
 
-  // Из запроса извлекаются свойства request, session и version.
-  const { request, session, version } = await json(req);
-
-  // В тело ответа вставляются свойства version и session из запроса.
-  // Подробнее о формате запроса и ответа — в разделе Протокол работы навыка.
+  const text = request.original_utterance;
+  const payload = request.payload;
+  console.log(request);
   return {
     version,
     session,
-    response: {
-
-      // В свойстве response.text возвращается исходная реплика пользователя.
-      // Если навык был активирован без дополнительной команды,
-      // пользователю нужно сказать "Hello!".
-      text: request.original_utterance || 'Hello!',
-
-      // Свойство response.end_session возвращается со значением false,
-      // чтобы диалог не завершался.
-      end_session: false,
-    },
+    response: answer(text, payload),
   };
 };
